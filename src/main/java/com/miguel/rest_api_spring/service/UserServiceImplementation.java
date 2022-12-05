@@ -6,15 +6,51 @@ import com.miguel.rest_api_spring.repo.RoleRepo;
 import com.miguel.rest_api_spring.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service @RequiredArgsConstructor @Transactional @Slf4j
-public class UserServiceImplementation implements UserService {
+public class UserServiceImplementation implements UserService, UserDetailsService {
 
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        AppUser user = userRepo.findByUsername(username);
+
+        if(user == null) {
+            log.error("User not found in db...");
+            throw new UsernameNotFoundException("User not found in db...");
+        }
+        else {
+            log.info("User {} found in db", username);
+
+            // CREATE AUTHORITIES
+            Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+
+            // LOOP ROLES AND ADD TO AUTHORITIES SIMPLE GRANTED AUTHORITY
+            user.getRoles().forEach(role -> {
+                authorities.add(new SimpleGrantedAuthority(role.getName()));
+            });
+
+            return new User(
+                    user.getUsername(),
+                    user.getPassword(),
+                    authorities
+            );
+        }
+
+    }
 
     @Override
     public AppUser saveUser(AppUser user) {
@@ -58,4 +94,6 @@ public class UserServiceImplementation implements UserService {
         log.info("Fetching all users");
         return userRepo.findAll();
     }
+
+
 }

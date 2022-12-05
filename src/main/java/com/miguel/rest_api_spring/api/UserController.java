@@ -4,7 +4,6 @@ import com.miguel.rest_api_spring.domain.Role;
 import com.miguel.rest_api_spring.service.UserServiceImplementation;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
